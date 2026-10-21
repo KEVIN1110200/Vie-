@@ -1,0 +1,824 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vie</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0b0909">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vie">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&family=JetBrains+Mono:wght@500&display=swap">
+<style>html,body{margin:0;padding:0}[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<style>
+/* Layout : même format que le thème V Barber — écran d'accueil plein écran, en-tête avec onglets numérotés i. ii. iii.,
+   panneaux plein écran qui défilent, cartes en arche, barre d'onglets en pilule en bas sur mobile. Palette : noir, bleu, violet. */
+:root{
+  /* Palette reprise du thème V Barber : noir, vin, or, crème */
+  --ink:#0b0909; --ink-2:#141010; --deep:#5a0f1e; --violet:#5a0f1e; --violet-2:#7a1a2c;
+  --blue:#cfae78; --line:#cfae78; --light:#e6cc9c; --cream:#f3ebe0; --ok:#46e0a0; --bad:#ff6b88; --warn:#ffc266;
+  --serif:"Cormorant Garamond","Times New Roman",serif;
+  --sans:"Jost","Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --header-h:92px;
+  color-scheme:dark;
+}
+html,body{background:var(--ink);color:var(--cream);height:100%}
+body{overflow:hidden}
+.vb{position:fixed;inset:0;font-family:var(--sans);font-weight:300;-webkit-font-smoothing:antialiased;overflow:hidden;background:var(--ink);color:var(--cream)}
+.vb *,.vb *::before,.vb *::after{box-sizing:border-box}
+.vb button,.vb input,.vb select,.vb textarea{font:inherit;color:inherit}
+.vb :focus-visible{outline:1px solid var(--light);outline-offset:3px}
+
+/* Fond animé */
+.vb-stage{position:absolute;inset:0;overflow:hidden;background:var(--ink)}
+.vb-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.08);transition:opacity 1800ms ease,transform 9s linear}
+.vb-stage img.is-active{opacity:1;transform:scale(1)}
+.vb-tint{display:none;position:absolute;inset:0;pointer-events:none;background:linear-gradient(160deg,rgba(122,26,44,.22),rgba(122,26,44,.26));mix-blend-mode:color}
+@media (prefers-reduced-motion:reduce){.vb-stage img{transition:opacity .4s linear;transform:none}}
+.vb-shade{position:absolute;inset:0;pointer-events:none;transition:opacity 1200ms ease}
+.vb-shade--intro{background:linear-gradient(180deg,rgba(11,9,9,0) 70%,rgba(11,9,9,.6) 100%)}
+.vb:not(.vb--site) .vb-tint{opacity:0}
+.vb-tint{transition:opacity 1200ms ease}
+.vb-stage .vb-v{position:absolute;inset:0;opacity:0;transition:opacity 1800ms ease}
+.vb-stage .vb-v.is-active{opacity:1}
+.vb-stage .vb-v img{position:absolute;opacity:1;transition:transform 9s linear}
+.vb-stage .vb-v .bg{inset:-10%;width:120%;height:120%;object-fit:cover;filter:blur(48px) saturate(1.2) brightness(.55);transform:scale(1.1)}
+.vb-stage .vb-v .fg{inset:auto;left:50%;top:46%;width:auto;height:auto;max-width:min(78vw,520px);max-height:50vh;aspect-ratio:auto;object-fit:contain;transform:translate(-50%,-50%) scale(1.04);
+  -webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 62%,transparent 100%)}
+.vb-stage .vb-v.is-active .fg{transform:translate(-50%,-50%) scale(1)}
+.vb-stage .vb-v.is-active .bg{transform:scale(1.18)}
+.vb-shade--site{opacity:0;background:linear-gradient(90deg,rgba(11,9,9,.93) 0%,rgba(11,9,9,.8) 40%,rgba(11,9,9,.4) 70%,rgba(11,9,9,.2) 100%),linear-gradient(180deg,rgba(11,9,9,.7) 0%,rgba(11,9,9,0) 22%)}
+.vb--site .vb-shade--intro{opacity:0}
+.vb--site .vb-shade--site{opacity:1}
+
+/* Écran d'accueil */
+.vb-intro{position:absolute;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center;text-align:center;cursor:pointer;
+  padding-top:24px;padding-bottom:calc(64px + env(safe-area-inset-bottom,0px));padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));
+  transition:opacity 900ms ease,visibility 0s linear 900ms}
+.vb--site .vb-intro{opacity:0;visibility:hidden;pointer-events:none}
+.vb-intro__inner{width:100%;max-width:620px}
+.vb-intro__kicker{font-family:var(--serif);font-style:italic;font-size:clamp(20px,2.4vw,28px);color:var(--light);animation:vb-rise 1.2s .3s cubic-bezier(.2,.7,.2,1) both}
+.vb-intro__brand{font-family:var(--serif);font-weight:500;font-size:clamp(56px,11vw,110px);line-height:.92;letter-spacing:.1em;text-transform:uppercase;margin:8px 0 0;color:var(--cream);text-shadow:0 4px 60px rgba(0,0,0,.45);animation:vb-rise 1.4s .55s cubic-bezier(.2,.7,.2,1) both}
+.vb-intro__brand b{font-weight:600;background:linear-gradient(160deg,#f1dcb0,#cfae78);-webkit-background-clip:text;background-clip:text;color:transparent}
+.vb-intro__rule{width:120px;height:1px;background:linear-gradient(90deg,var(--blue),var(--violet-2));margin:22px auto 18px;transform-origin:center;animation:vb-rule 1.2s 1.1s cubic-bezier(.2,.7,.2,1) both}
+.vb-intro__tag{font-size:12px;letter-spacing:.3em;text-transform:uppercase;margin:0 0 14px;animation:vb-rise 1.2s 1.3s cubic-bezier(.2,.7,.2,1) both;text-wrap:balance}
+.vb-intro__words{font-family:var(--serif);font-style:italic;font-size:19px;color:var(--light);margin:0 0 26px;animation:vb-rise 1.2s 1.45s cubic-bezier(.2,.7,.2,1) both;text-wrap:balance}
+.vb-intro__cta{animation:vb-rise 1.2s .6s cubic-bezier(.2,.7,.2,1) both;display:flex;flex-direction:column;align-items:center;gap:18px}
+.vb-intro__cta .vb-btn{min-width:260px}
+.vb-intro__links{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:rgba(243,235,224,.7)}
+.vb-intro__dots{position:absolute;left:0;right:0;bottom:calc(28px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;justify-content:center}
+.vb-intro__dots span{width:14px;height:1px;background:rgba(243,235,224,.3);position:relative;overflow:hidden}
+.vb-intro__dots span.is-active::after{content:"";position:absolute;inset:0;background:var(--line);animation:vb-progress 3000ms linear forwards;transform-origin:left}
+@keyframes vb-rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes vb-rule{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes vb-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+/* En-tête */
+.vb-header{position:absolute;top:0;left:0;right:0;z-index:15;height:calc(var(--header-h) + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px);
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding-left:max(4vw,env(safe-area-inset-left,0px));padding-right:max(4vw,env(safe-area-inset-right,0px));
+  opacity:0;transform:translateY(-14px);transition:opacity .9s .5s ease,transform .9s .5s cubic-bezier(.2,.7,.2,1);pointer-events:none}
+.vb--site .vb-header{opacity:1;transform:none;pointer-events:auto}
+.vb-logo{justify-self:start;font-family:var(--serif);font-weight:500;font-size:30px;letter-spacing:.14em;text-transform:uppercase;line-height:1;display:flex;align-items:baseline;gap:4px;background:none;border:0;cursor:pointer;padding:0}
+.vb-logo{align-items:center;gap:12px}
+.vb-logo__img{width:46px;height:46px;border-radius:12px;object-fit:cover;border:1px solid rgba(207,174,120,.5);box-shadow:0 8px 24px rgba(0,0,0,.5);flex:none}
+.vb-intro__logo{display:block;width:clamp(96px,22vw,132px);height:auto;aspect-ratio:1;margin:0 auto 22px;border-radius:28px;object-fit:cover;border:1px solid rgba(230,204,156,.55);box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 60px rgba(122,26,44,.35);animation:vb-rise 1.2s .1s cubic-bezier(.2,.7,.2,1) both}
+.vb-logo b{font-weight:600;font-size:38px;background:linear-gradient(160deg,#f1dcb0,#cfae78);-webkit-background-clip:text;background-clip:text;color:transparent}
+.vb-tabs{position:relative;display:flex;gap:2px}
+.vb-tab{background:none;border:0;cursor:pointer;padding:14px 16px;display:flex;align-items:baseline;gap:8px;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:rgba(243,235,224,.6);transition:color .4s ease;white-space:nowrap}
+.vb-tab span{font-family:var(--serif);font-style:italic;font-size:15px;letter-spacing:.02em;color:var(--line);opacity:.9}
+.vb-tab .s{display:none}
+.vb-tab:hover,.vb-tab[aria-selected="true"]{color:var(--cream)}
+.vb-tabs__bar{position:absolute;bottom:4px;left:0;height:1px;width:0;background:linear-gradient(90deg,var(--blue),var(--violet-2));transition:transform .7s cubic-bezier(.65,0,.35,1),width .7s cubic-bezier(.65,0,.35,1)}
+.vb-actions{justify-self:end;display:flex;gap:16px;align-items:center;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:rgba(243,235,224,.7)}
+.vb-sync{display:flex;align-items:center;gap:8px}
+.vb-sync i{width:6px;height:6px;border-radius:50%;background:rgba(243,235,224,.35)}
+.vb-sync.on i{background:var(--ok);box-shadow:0 0 10px var(--ok)}
+
+/* Panneaux */
+.vb-panels{position:absolute;inset:0;z-index:10}
+.vb:not(.vb--site) .vb-panels,.vb:not(.vb--site) .vb-panel{visibility:hidden!important;pointer-events:none}
+.vb-panel{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  padding-top:calc(var(--header-h) + env(safe-area-inset-top,0px) + 6vh);padding-bottom:12vh;
+  padding-left:max(4vw,env(safe-area-inset-left,0px));padding-right:max(4vw,env(safe-area-inset-right,0px));
+  visibility:hidden;pointer-events:none;scrollbar-width:thin;scrollbar-color:rgba(207,174,120,.4) transparent}
+.vb-panel.is-active{visibility:visible;pointer-events:auto}
+.vb-panel__content{max-width:720px}
+.vb-panel--wide .vb-panel__content{max-width:1120px}
+.vb-anim{opacity:0;transform:translateY(26px);filter:blur(4px);transition:opacity .5s ease,transform .5s ease,filter .5s ease}
+.vb-panel.is-active .vb-anim{opacity:1;transform:none;filter:none;transition:opacity 1s cubic-bezier(.2,.7,.2,1),transform 1.1s cubic-bezier(.2,.7,.2,1),filter 1s ease;transition-delay:calc(250ms + var(--i,0)*90ms)}
+.vb-kicker{display:flex;align-items:center;gap:16px;margin-bottom:26px;font-size:12px;letter-spacing:.36em;text-transform:uppercase;color:var(--line)}
+.vb-kicker em{font-family:var(--serif);font-size:20px;letter-spacing:0}
+.vb-kicker::after{content:"";width:60px;height:1px;background:var(--line);opacity:.7}
+.vb-title{font-family:var(--serif);font-weight:400;font-size:clamp(44px,6.2vw,92px);line-height:.98;letter-spacing:-.005em;margin:0 0 28px;color:var(--cream);text-wrap:balance}
+.vb-title em{display:block;font-style:italic;color:var(--light)}
+.vb-lead{font-size:18px;line-height:1.7;max-width:540px;margin:0 0 34px;color:rgba(243,235,224,.88)}
+.vb-h3{font-family:var(--serif);font-weight:500;font-size:clamp(30px,3.4vw,44px);line-height:1.05;margin:64px 0 18px}
+.vb-h3 em{font-style:italic;color:var(--light)}
+.vb-sub{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:rgba(243,235,224,.6);margin:-8px 0 20px}
+
+/* Liste numérotée (format « étapes ») */
+.vb-steps{list-style:none;margin:0 0 40px;padding:0;max-width:720px}
+.vb-step{border-top:1px solid rgba(207,174,120,.25)}
+.vb-step:last-child{border-bottom:1px solid rgba(207,174,120,.25)}
+.vb-step>summary,.vb-step>.row{list-style:none;display:flex;align-items:baseline;gap:18px;padding:18px 0;cursor:pointer}
+.vb-step>summary::-webkit-details-marker{display:none}
+.vb-step .n{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--line);min-width:30px}
+.vb-step .w{flex:1;min-width:0}
+.vb-step .w b{display:block;font-weight:400;font-size:13px;letter-spacing:.2em;text-transform:uppercase}
+.vb-step .w span{display:block;font-family:var(--serif);font-size:20px;line-height:1.25;margin-top:4px;color:rgba(243,235,224,.9)}
+.vb-step.ok .w span{color:rgba(243,235,224,.5);text-decoration:line-through;text-decoration-color:var(--violet-2)}
+.vb-step .body{padding:0 0 22px 48px;display:flex;flex-direction:column;gap:14px}
+.st{font-size:10px;letter-spacing:.28em;text-transform:uppercase;padding:6px 12px;border-radius:999px;border:1px solid rgba(255,194,102,.5);color:var(--warn);white-space:nowrap;align-self:center}
+.st.ok{border-color:rgba(70,224,160,.55);color:var(--ok)}
+
+/* Cases à cocher */
+.vb-check{display:flex;align-items:center;gap:18px;padding:15px 0;border-top:1px solid rgba(207,174,120,.25);cursor:pointer}
+.vb-check:last-child{border-bottom:1px solid rgba(207,174,120,.25)}
+.box{appearance:none;-webkit-appearance:none;width:24px;height:24px;flex:none;margin:0;border:1px solid var(--line);transform:rotate(45deg) scale(.82);background:transparent;display:grid;place-items:center;transition:background .3s ease}
+.box:checked{background:linear-gradient(135deg,var(--blue),var(--violet-2));border-color:transparent}
+.box:checked::after{content:"";width:6px;height:6px;background:var(--cream)}
+.vb-check .t{font-size:13px;letter-spacing:.16em;text-transform:uppercase}
+.vb-check.done .t{color:rgba(243,235,224,.45);text-decoration:line-through;text-decoration-color:var(--violet-2)}
+
+/* Champs */
+.vb-label{display:flex;flex-direction:column;gap:8px;font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:rgba(243,235,224,.62)}
+.vb-input{width:100%;background:rgba(11,9,9,.5);border:1px solid rgba(207,174,120,.4);border-radius:14px;padding:13px 16px;font:300 16px var(--sans);letter-spacing:.02em;color:var(--cream);text-transform:none;backdrop-filter:blur(8px)}
+textarea.vb-input{min-height:84px;resize:vertical}
+.vb-field{display:flex;align-items:center;padding:5px 5px 5px 22px;border:1px solid rgba(207,174,120,.55);border-radius:999px;background:rgba(11,9,9,.45);backdrop-filter:blur(10px)}
+.vb-field input{flex:1;min-width:0;background:transparent;border:0;outline:0;font:300 16px var(--sans);padding:11px 0;color:var(--cream)}
+.vb-field input::placeholder{color:rgba(243,235,224,.55)}
+.vb-field button{flex:none;border:0;cursor:pointer;border-radius:999px;padding:0 22px;height:44px;background:var(--cream);color:var(--deep);font-size:11px;font-weight:500;letter-spacing:.24em;text-transform:uppercase}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* Boutons */
+.vb-btns{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.vb-btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:54px;padding:0 32px;border-radius:999px;cursor:pointer;border:1px solid var(--line);
+  background:linear-gradient(135deg,var(--violet-2),var(--deep));color:var(--cream);font-size:11.5px;font-weight:500;letter-spacing:.26em;text-transform:uppercase;
+  box-shadow:0 18px 50px rgba(90,15,30,.35);transition:transform .3s ease,box-shadow .3s ease}
+.vb-btn:hover{transform:translateY(-2px);box-shadow:0 22px 60px rgba(90,15,30,.55)}
+.vb-btn--ghost{background:transparent;box-shadow:none}
+.vb-btn--ghost:hover{background:rgba(207,174,120,.12);box-shadow:none}
+.vb-btn--ok{border-color:rgba(70,224,160,.6);background:rgba(70,224,160,.1);box-shadow:none;color:var(--ok)}
+.vb-btn--sm{min-height:44px;padding:0 22px;font-size:10.5px}
+.vb-upl{position:relative;overflow:hidden}
+.vb-upl input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.vb-note{margin-top:24px;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:rgba(243,235,224,.6)}
+.proofs{display:flex;gap:10px;flex-wrap:wrap}
+.proofs img{width:76px;height:96px;object-fit:cover;border-radius:38px 38px 8px 8px;border:1px solid rgba(207,174,120,.45)}
+
+/* Citation, conseil */
+.vb-quote{font-family:var(--serif);font-style:italic;font-size:clamp(22px,2.2vw,28px);color:var(--light);margin:0 0 22px;max-width:640px;line-height:1.35;text-wrap:balance}
+.vb-soon{max-width:560px;padding:24px 28px;margin:0 0 30px;border-left:1px solid var(--line);font-family:var(--serif);font-style:italic;font-size:23px;line-height:1.35;color:var(--light);background:linear-gradient(90deg,rgba(11,9,9,.55),rgba(11,9,9,0))}
+.vb-soon small{display:block;font-family:var(--sans);font-style:normal;font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--line);margin-bottom:10px}
+
+/* Planning */
+.vb-days{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 0 26px;padding:2px}
+.vb-days::-webkit-scrollbar{display:none}
+.vb-days button{flex:1 0 64px;padding:12px 0;border-radius:999px;border:1px solid rgba(207,174,120,.45);background:rgba(11,9,9,.45);backdrop-filter:blur(6px);cursor:pointer;font-size:11px;letter-spacing:.22em;text-transform:uppercase}
+.vb-days button.on{background:var(--cream);color:var(--deep);border-color:var(--cream)}
+.vb-slot{display:grid;grid-template-columns:70px 1fr;gap:18px;padding:16px 0;border-top:1px solid rgba(207,174,120,.22);align-items:baseline}
+.vb-slot:last-child{border-bottom:1px solid rgba(207,174,120,.22)}
+.vb-slot .h{font-family:var(--mono);font-size:12px;color:var(--light);font-variant-numeric:tabular-nums}
+.vb-slot .h small{display:block;color:rgba(243,235,224,.45)}
+.vb-slot .d{font-family:var(--serif);font-size:20px;line-height:1.25}
+.vb-slot .d small{display:block;font-family:var(--sans);font-size:10px;letter-spacing:.28em;text-transform:uppercase;margin-bottom:4px}
+.vb-slot.cur{background:linear-gradient(90deg,rgba(122,26,44,.22),transparent);border-radius:10px}
+
+/* Cartes en arche */
+.vb-offers{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:22px;max-width:1000px}
+.vb-offer{display:flex;flex-direction:column;padding:50px 34px 34px;border-radius:240px 240px 16px 16px;border:1px solid rgba(207,174,120,.45);background:rgba(11,9,9,.62);backdrop-filter:blur(12px);min-width:0}
+.vb-offer--featured{background:linear-gradient(180deg,rgba(90,15,30,.88),rgba(90,15,30,.92));border-color:var(--light);box-shadow:0 40px 90px rgba(90,15,30,.4)}
+.vb-offer__badge{align-self:center;margin:16px 0 18px;padding:8px 18px;border:1px solid var(--line);border-radius:999px;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--light);text-align:center}
+.vb-offer__name{text-align:center;font-family:var(--serif);font-weight:500;font-size:clamp(28px,2.6vw,36px);margin:0 0 6px;line-height:1.05}
+.vb-offer__big{text-align:center;font-family:var(--serif);font-weight:500;font-size:clamp(48px,6vw,68px);line-height:1;margin:6px 0 8px;font-variant-numeric:lining-nums tabular-nums}
+.vb-offer__tag{text-align:center;font-family:var(--serif);font-style:italic;font-size:19px;color:var(--light);margin-bottom:22px}
+.vb-offer__text{font-size:15px;line-height:1.7;color:rgba(243,235,224,.88)}
+.vb-offer__list{list-style:none;margin:0 0 6px;padding:18px 0 0;border-top:1px solid rgba(207,174,120,.3)}
+.vb-offer__list li{display:flex;gap:14px;align-items:baseline;justify-content:space-between;padding:7px 0;font-size:14.5px;letter-spacing:.03em}
+.vb-offer__list li span:first-child{display:flex;gap:12px;align-items:baseline}
+.vb-offer__list li span:first-child::before{content:"";flex:0 0 6px;height:6px;transform:rotate(45deg) translateY(-2px);background:var(--line)}
+.vb-offer__list li b{font-weight:400;font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums}
+.vb-meter{height:2px;background:rgba(243,235,224,.2);margin:14px 0 6px;border-radius:2px;overflow:hidden}
+.vb-meter i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--light))}
+.vb-seg{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 26px}
+.vb-seg button{padding:10px 20px;border-radius:999px;border:1px solid rgba(207,174,120,.45);background:rgba(11,9,9,.4);cursor:pointer;font-size:10.5px;letter-spacing:.24em;text-transform:uppercase}
+.vb-seg button.on{background:var(--cream);color:var(--deep);border-color:var(--cream)}
+.vb-ent{display:flex;align-items:baseline;gap:14px;padding:14px 0;border-top:1px solid rgba(207,174,120,.22)}
+.vb-ent .l{flex:1;min-width:0}
+.vb-ent .l b{display:block;font-family:var(--serif);font-weight:500;font-size:19px}
+.vb-ent .l small{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(243,235,224,.55)}
+.vb-ent .a{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums}
+.vb-ent .a.p{color:var(--ok)} .vb-ent .a.m{color:var(--bad)}
+.vb-x{border:0;background:none;color:rgba(243,235,224,.5);font-size:20px;cursor:pointer;padding:2px 6px}
+.vb-hist{padding:12px 0 12px 18px;border-left:1px solid var(--line);font-size:15px;line-height:1.55}
+.vb-hist b{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;font-weight:400;color:var(--light)}
+.vb-closing{margin:80px 0 20px;max-width:1000px;text-align:center}
+.vb-closing::before{content:"";display:block;width:1px;height:64px;background:linear-gradient(180deg,var(--blue),var(--violet-2));margin:0 auto 28px}
+.vb-closing p{font-family:var(--serif);font-size:clamp(28px,3.4vw,46px);line-height:1.15;margin:0;text-wrap:balance}
+.vb-closing em{color:var(--light)}
+.vb-words{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:22px}
+.vb-words span{padding:7px 14px;border:1px solid rgba(207,174,120,.45);border-radius:999px;font-size:10px;letter-spacing:.26em;text-transform:uppercase}
+.vb-words span.no{border-color:rgba(255,107,136,.5);color:#ffb0c0}
+.ring{display:flex;align-items:center;gap:18px;margin:0 0 34px}
+.ring .c{--p:0;width:76px;height:76px;border-radius:50%;flex:none;display:grid;place-items:center;background:conic-gradient(var(--light) calc(var(--p)*1%),rgba(243,235,224,.12) 0)}
+.ring .c b{width:68px;height:68px;border-radius:50%;background:var(--ink-2);display:grid;place-items:center;font-family:var(--serif);font-size:24px;font-weight:500}
+.ring .t{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:rgba(243,235,224,.7);line-height:1.9}
+.ring .t strong{display:block;font-family:var(--serif);font-size:22px;letter-spacing:0;text-transform:none;font-weight:400;color:var(--cream);line-height:1.2}
+
+
+/* Sensei du jour */
+.vb-sensei{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:30px;align-items:center;max-width:860px;margin:0 0 10px}
+.vb-sensei__img{aspect-ratio:3/4;max-width:100%;border-radius:200px 200px 14px 14px;overflow:hidden;border:1px solid rgba(207,174,120,.5);box-shadow:0 40px 90px rgba(0,0,0,.55);position:relative}
+.vb-sensei__img::after{content:"";position:absolute;inset:8px;border-radius:192px 192px 8px 8px;border:1px solid rgba(230,204,156,.18);pointer-events:none}
+.vb-sensei__img img{width:100%;height:100%;object-fit:cover;display:block}
+.vb-sensei__txt{min-width:0;display:flex;flex-direction:column}
+.vb-sensei__name{font-family:var(--serif);font-weight:500;font-size:clamp(34px,4vw,48px);line-height:1;margin:0 0 16px}
+.vb-sensei__name em{display:block;font-style:italic;font-weight:400;color:var(--light);font-size:.62em;margin-top:6px}
+.vb-sensei__lesson{font-family:var(--serif);font-style:italic;font-size:21px;line-height:1.4;margin:0 0 16px;color:rgba(243,235,224,.92)}
+.vb-sensei__do{margin:0;padding:14px 0 0;border-top:1px solid rgba(207,174,120,.3);font-size:15px;line-height:1.6;color:var(--cream)}
+.vb-dojo{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:14px;max-width:1000px}
+.vb-dojo button{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:8px;min-width:0}
+.vb-dojo button:focus-visible{outline:1px solid var(--light);outline-offset:4px}
+.vb-dojo img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:90px 90px 10px 10px;border:1px solid rgba(207,174,120,.4);display:block;transition:transform .4s ease,border-color .4s ease}
+.vb-dojo button:hover img,.vb-dojo button.on img{transform:translateY(-3px);border-color:var(--light)}
+.vb-dojo b{font-family:var(--serif);font-weight:500;font-size:18px;line-height:1.1}
+.vb-dojo small{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(243,235,224,.6)}
+@media (max-width:700px){.vb-sensei{grid-template-columns:1fr;gap:22px}.vb-sensei__img{max-width:300px;width:100%;margin:0 auto}}
+.vb-alert{position:absolute;z-index:25;left:50%;top:calc(var(--header-h) + env(safe-area-inset-top,0px) + 6px);transform:translate(-50%,-12px);opacity:0;pointer-events:none;
+  width:min(560px,calc(100% - 32px));display:flex;align-items:center;gap:14px;padding:12px 12px 12px 20px;border-radius:999px;
+  background:linear-gradient(135deg,rgba(122,26,44,.95),rgba(90,15,30,.95));border:1px solid var(--light);box-shadow:0 20px 60px rgba(90,15,30,.5);transition:opacity .5s ease,transform .5s ease}
+.vb-alert.is-on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.vb-alert .t{flex:1;min-width:0;font-size:13px;line-height:1.35}
+.vb-alert .t small{display:block;font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--light)}
+.vb-alert button{flex:none;border:0;border-radius:999px;background:var(--cream);color:var(--deep);padding:10px 16px;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer}
+.vb-toast{position:absolute;z-index:30;left:50%;bottom:calc(30px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;padding:14px 26px;border-radius:999px;background:var(--cream);color:var(--deep);font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;transition:opacity .5s ease,transform .5s ease;pointer-events:none;white-space:nowrap}
+.vb-toast.is-on{opacity:1;transform:translate(-50%,0)}
+
+/* Mobile */
+@media (max-width:960px){
+  .vb{--header-h:70px}
+  .vb-header{grid-template-columns:1fr auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+  .vb-logo{font-size:24px}.vb-logo b{font-size:30px}.vb-logo__img{width:40px;height:40px;border-radius:11px}
+  .vb-tabs{position:fixed;left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:16;justify-content:space-between;gap:0;padding:4px;border-radius:999px;background:rgba(11,9,9,.78);border:1px solid rgba(207,174,120,.4);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  .vb-tab{flex:1 1 0;min-width:0;justify-content:center;padding:14px 0;font-size:11.5px;letter-spacing:.02em;text-transform:none}
+  .vb-tab span,.vb-tab .l{display:none}
+  .vb-tab .s{display:inline}
+  .vb-tabs__bar{bottom:8px}
+  .vb-shade--site{background:linear-gradient(180deg,rgba(11,9,9,.82) 0%,rgba(11,9,9,.74) 40%,rgba(11,9,9,.93) 100%)}
+  .vb-panel{padding-top:calc(var(--header-h) + env(safe-area-inset-top,0px) + 26px);padding-bottom:calc(120px + env(safe-area-inset-bottom,0px));padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+  .vb-lead{font-size:16px}
+  .vb-step .body{padding-left:0}
+  .vb-offer{padding:44px 22px 28px;border-radius:170px 170px 14px 14px}
+  .vb-intro__cta .vb-btn{width:100%}
+}
+@media (max-width:420px){ .grid2{grid-template-columns:1fr} .vb-slot{grid-template-columns:56px 1fr;gap:12px} }
+@media (prefers-reduced-motion:reduce){
+  .vb-anim,.vb-panel.is-active .vb-anim{transition:opacity .3s linear;transform:none;filter:none}
+  .vb-intro__kicker,.vb-intro__brand,.vb-intro__rule,.vb-intro__tag,.vb-intro__words,.vb-intro__cta{animation-duration:.01s;animation-delay:0s}
+}
+</style>
+
+<div id="vb" class="vb">
+  <div class="vb-stage" aria-hidden="true"></div>
+  <div class="vb-tint"></div>
+  <div class="vb-shade vb-shade--intro"></div>
+  <div class="vb-shade vb-shade--site"></div>
+
+  <section class="vb-intro" aria-label="Bienvenue">
+    <div class="vb-intro__inner">
+      <div class="vb-intro__cta"><button type="button" class="vb-btn" data-vb-enter>Entrer</button></div>
+    </div>
+    <div class="vb-intro__dots" data-vb-dots aria-hidden="true" hidden></div>
+  </section>
+
+  <header class="vb-header">
+    <button type="button" class="vb-logo" data-vb-go="jour" aria-label="Vie, accueil"><img class="vb-logo__img" id="logoHead" alt=""><span><b>V</b>ie</span></button>
+    <nav class="vb-tabs" role="tablist" aria-label="Navigation principale">
+      <button type="button" class="vb-tab" role="tab" data-vb-go="jour"><span>i.</span><em class="l" style="font-style:normal">Aujourd'hui</em><em class="s" style="font-style:normal">Jour</em></button>
+      <button type="button" class="vb-tab" role="tab" data-vb-go="semaine"><span>ii.</span><em class="l" style="font-style:normal">Semaine</em><em class="s" style="font-style:normal">Semaine</em></button>
+      <button type="button" class="vb-tab" role="tab" data-vb-go="projets"><span>iii.</span><em class="l" style="font-style:normal">Projets</em><em class="s" style="font-style:normal">Projets</em></button>
+      <button type="button" class="vb-tab" role="tab" data-vb-go="argent"><span>iv.</span><em class="l" style="font-style:normal">Argent</em><em class="s" style="font-style:normal">Argent</em></button>
+      <button type="button" class="vb-tab" role="tab" data-vb-go="conseils"><span>v.</span><em class="l" style="font-style:normal">Conseils</em><em class="s" style="font-style:normal">Conseils</em></button>
+      <i class="vb-tabs__bar" aria-hidden="true"></i>
+    </nav>
+    <div class="vb-actions"><span class="vb-sync" id="sync" hidden><i></i></span></div>
+  </header>
+
+  <div class="vb-panels">
+    <section class="vb-panel" id="p-jour" data-vb-panel="jour" role="tabpanel" aria-label="Aujourd'hui"><div class="vb-panel__content"></div></section>
+    <section class="vb-panel" id="p-semaine" data-vb-panel="semaine" role="tabpanel" aria-label="Semaine"><div class="vb-panel__content"></div></section>
+    <section class="vb-panel" id="p-projets" data-vb-panel="projets" role="tabpanel" aria-label="Projets"><div class="vb-panel__content"></div></section>
+    <section class="vb-panel vb-panel--wide" id="p-argent" data-vb-panel="argent" role="tabpanel" aria-label="Argent"><div class="vb-panel__content"></div></section>
+    <section class="vb-panel vb-panel--wide" id="p-conseils" data-vb-panel="conseils" role="tabpanel" aria-label="Conseils"><div class="vb-panel__content"></div></section>
+  </div>
+
+  <div class="vb-alert" id="alert" role="status"><div class="t"><small id="alertWhen"></small><span id="alertWhat"></span></div><button type="button" id="alertOk">OK</button></div>
+  <div class="vb-toast" id="toast" role="status"></div>
+</div>
+
+<script>
+/* ===================== Données ===================== */
+const PROJECTS = [
+  {k:"foot",   n:"Football",            def:"Faire des vidéos et améliorer le format vidéo (TikTok)"},
+  {k:"musique",n:"Musique",             def:"Faire un son aujourd'hui"},
+  {k:"marque", n:"Marque de vêtements", def:"Finir le site de la marque"},
+  {k:"barber", n:"Barber · coiffure",   def:"Finir le site barber"},
+  {k:"modele", n:"Modèle photo · mode", def:"Faire mes polas"},
+  {k:"vente",  n:"Vente en tout genre", def:"Trouver des clients"}
+];
+const ROMAN = ["i.","ii.","iii.","iv.","v.","vi.","vii.","viii.","ix.","x."];
+const HABITS = [
+  {k:"reveil",n:"Réveil avant 9 h"},{k:"doucheM",n:"Douche du matin"},{k:"chambre",n:"Chambre propre"},
+  {k:"muscu",n:"Musculation"},{k:"manger",n:"Manger équilibré"},{k:"lecture",n:"Lecture 15 à 30 min"},
+  {k:"doucheS",n:"Douche du soir"},{k:"sommeil",n:"Couché avant 1 h"},{k:"skin",n:"Skincare + coiffure",sunday:true}
+];
+const CAT = {foot:"Football",musique:"Musique",marque:"Marque",barber:"Barber",modele:"Modèle",vente:"Vente",sport:"Muscu",permis:"Permis",vie:"Vie"};
+const WEEKDAY = [
+  ["08:00","08:45","vie","Réveil, douche, chambre rangée, petit-déj"],
+  ["08:45","09:45","vente","Trouver des clients : messages, posts, relances"],
+  ["09:45","11:15","foot","Entraînement + tournage"],
+  ["11:15","12:30","foot","Montage, améliorer le format TikTok"],
+  ["12:30","13:30","vie","Déjeuner équilibré"],
+  ["13:30","15:30","musique","Faire le son du jour"],
+  ["15:30","16:30","marque","Site de la marque de vêtements"],
+  ["16:30","17:30","barber","Site barber"],
+  ["17:30","18:30","sport","Musculation"],
+  ["18:30","19:45","barber","Coiffure : clients"],
+  ["19:45","20:30","vie","Dîner + douche du soir"],
+  ["20:30","21:15","modele","Polas, book, contacts marques"],
+  ["21:15","21:45","permis","Code de la route"],
+  ["21:45","22:05","vie","Lecture"],
+  ["22:05","22:30","vie","Bilan : valider les missions, noter l'argent"]
+];
+const SATURDAY = [
+  ["08:00","08:45","vie","Réveil, douche, chambre rangée, petit-déj"],
+  ["08:45","10:00","vente","Clients + livraisons"],
+  ["10:00","12:30","barber","Coiffure : clients"],
+  ["12:30","13:30","vie","Déjeuner équilibré"],
+  ["13:30","15:00","musique","Faire le son du jour"],
+  ["15:00","16:30","foot","Match ou tournage + montage"],
+  ["16:30","17:30","sport","Musculation"],
+  ["17:30","18:30","marque","Avancer les sites marque + barber"],
+  ["18:30","19:30","barber","Coiffure : clients"],
+  ["19:30","20:30","vie","Dîner + douche du soir"],
+  ["20:30","21:15","modele","Polas, book"],
+  ["21:15","21:45","vie","Lecture"],
+  ["21:45","22:30","vie","Bilan : missions + argent"]
+];
+const SUNDAY = [
+  ["09:00","10:00","vie","Réveil (10 h max), douche, chambre, brunch"],
+  ["10:00","11:00","sport","Musculation, séance plus légère"],
+  ["11:00","12:30","musique","Faire le son du jour"],
+  ["12:30","13:30","vie","Déjeuner équilibré"],
+  ["13:30","14:30","foot","Montage + programmer les vidéos de la semaine"],
+  ["14:30","15:30","vente","Préparer les annonces de la semaine"],
+  ["15:30","16:30","marque","Petite avancée marque, barber, polas"],
+  ["16:30","19:00","vie","Repos, famille, amis"],
+  ["19:00","19:45","vie","Bilan de la semaine : argent, missions, objectifs"],
+  ["19:45","20:30","vie","Dîner + meal prep de la semaine"],
+  ["20:30","21:15","vie","Douche du soir : skincare + coiffure"],
+  ["21:15","21:45","vie","Lecture"],
+  ["21:45","22:30","vie","Préparer la semaine dans l'app"]
+];
+const PLAN = d => d===0?SUNDAY:d===6?SATURDAY:WEEKDAY;
+const DAYN = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
+const MONTHN = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+const TIPS = [
+ ["Mindset","Lock-in. Une mission à la fois : tu la finis, tu la coches, tu passes à la suivante."],
+ ["Mindset","Tu n'as pas besoin d'être motivé. Tu as besoin d'être régulier. Le planning fait le reste."],
+ ["Mindset","Un an de discipline, c'est 365 petites victoires. Aujourd'hui en est une."],
+ ["Sagesse","Avant de réagir, respire. Avant de dépenser, attends 24 heures."],
+ ["Mindset","No drug, no girl, no distraction. Ce n'est pas une privation, c'est un investissement."],
+ ["Respect","Le respect commence par toi : ta chambre, ton corps, ta parole."],
+ ["Challenge","Fais la mission la plus dure en premier. Le reste de la journée paraîtra facile."],
+ ["Amusement","Amuse-toi dans le travail. Si c'est fun, tu le refais demain."],
+ ["Football","Les deux premières secondes font tout sur TikTok : ouvre sur ton meilleur geste, pas sur l'échauffement."],
+ ["Football","Filme à hauteur de hanche, téléphone stable, en vertical. La lumière derrière la caméra, jamais derrière toi."],
+ ["Football","Ralenti sur le geste clé, texte court à l'écran, son tendance : c'est le format qui tourne."],
+ ["Football","Poste à heure fixe. L'algorithme et tes abonnés aiment la régularité."],
+ ["Musique","Un son par jour, pas un chef-d'œuvre par jour. La quantité construit la qualité."],
+ ["Musique","Deux heures maximum par son. Exporte même s'il n'est pas parfait, tu reviendras dessus."],
+ ["Musique","Écoute un son d'un artiste que tu respectes et note ce qu'il fait mieux que toi."],
+ ["Marque","Un site simple qui vend vaut mieux qu'un site parfait jamais en ligne."],
+ ["Marque","Commence par trois pièces fortes, de belles photos et une page qui raconte ton histoire."],
+ ["Barber","Sur le site : tarifs clairs, photos avant/après, bouton de réservation visible partout."],
+ ["Barber","Demande à chaque client satisfait une photo et un avis. C'est ta meilleure pub."],
+ ["Modèle","Polas : fond uni, lumière du jour, sans filtre ni retouche. Face, profil, plein pied, avec et sans sourire."],
+ ["Modèle","Note tes mensurations et ta pointure : les agences les demandent avec les polas."],
+ ["Vente","Un client par jour minimum. Relance ceux d'hier avant d'en chercher de nouveaux."],
+ ["Vente","Une bonne photo et un prix clair vendent deux fois plus vite."],
+ ["Argent","80 % à l'épargne dès que l'argent rentre, avant d'y penser. Les 20 % restants sont à toi, sans culpabilité."],
+ ["Argent","Avec le chômage, ton revenu de base est fixe. Chaque euro en plus, c'est toi qui le crées."],
+ ["Argent","Un livret séparé pour l'épargne. Ce que tu ne vois pas, tu ne le dépenses pas."],
+ ["Santé","Une protéine à chaque repas : œufs, poulet, poisson, viande, lentilles."],
+ ["Santé","Deux litres d'eau par jour. Une bouteille sur le bureau, remplie deux fois."],
+ ["Santé","Couché avant 1 h, debout à 8 h : sept heures de sommeil, c'est là que le corps récupère."],
+ ["Santé","Pas d'écran vingt minutes avant de dormir. C'est le moment parfait pour ta lecture."],
+ ["Permis","Vingt questions de code par jour, et relis chaque erreur. C'est comme ça qu'on passe sous les cinq fautes."]
+];
+const RECIPES = [
+ ["Poulet, riz, brocolis","Le classique sportif","Blanc de poulet au paprika, riz basmati, brocolis vapeur, filet d'huile d'olive."],
+ ["Saumon, patate douce","Riche en oméga-3","Pavé de saumon au four 15 min, patate douce rôtie, haricots verts."],
+ ["Omelette trois œufs","Prête en 8 minutes","Œufs, épinards, fromage, tomate, avec du pain complet."],
+ ["Bowl de bœuf","Fer et protéines","Bœuf haché 5 %, riz, avocat, maïs, oignon, sauce yaourt-citron."],
+ ["Pâtes thon-tomate","Pas cher, efficace","Pâtes complètes, thon, sauce tomate, ail, basilic."],
+ ["Overnight oats","Le petit-déj préparé la veille","Flocons d'avoine, lait, yaourt grec, banane, miel."]
+];
+
+
+/* Sensei du jour : une leçon tirée d'un anime, appliquée à tes projets */
+const ANIME = [
+ ["a20","Tanjiro","Demon Slayer","Marche par marche","Tanjiro n'est pas né fort. Il a monté chaque marche, une par une, sans sauter d'étape.","Aujourd'hui : coche tes six missions dans l'ordre. Une marche à la fois."],
+ ["a03","Tanjiro","Demon Slayer","La progression invisible","Il a passé des mois devant un rocher impossible à trancher. Un jour, il l'a coupé. Le travail ne se voyait pas, mais il s'accumulait.","Aujourd'hui : même si ton son ou ton site n'avance pas « assez », fais ta séance. Ça compte."],
+ ["a04","Zenitsu","Demon Slayer","Maîtrise une seule chose","Zenitsu ne connaissait qu'une technique. Il l'a répétée jusqu'à la rendre plus rapide que l'éclair.","Aujourd'hui : choisis UNE chose à améliorer dans tes vidéos foot et répète-la sur chaque clip."],
+ ["a06","Rengoku","Demon Slayer","Tenir jusqu'au bout","Rengoku a donné tout ce qu'il avait jusqu'à la dernière seconde, sans se plaindre.","Aujourd'hui : ne coupe pas la muscu à mi-séance. Finis ce que tu commences."],
+ ["a16","Rengoku","Demon Slayer","Garde ta flamme","Même entouré de feu et de fatigue, il reste droit et calme. Sa flamme vient de l'intérieur.","Aujourd'hui : rappelle-toi pourquoi tu as lancé tes 6 projets. Écris-le en une phrase dans Projets."],
+ ["a05","Tanjiro","Demon Slayer","La paix intérieure","Au milieu de la forêt, il avance doucement. La force n'empêche pas la douceur.","Aujourd'hui : 15 minutes de lecture sans téléphone. Paix avant la performance."],
+ ["a08","Giyu","Demon Slayer","Calme comme l'eau","Giyu parle peu et ne s'agite jamais. Il agit au bon moment, avec précision.","Aujourd'hui : moins de paroles sur tes projets, plus d'actions. Montre, ne raconte pas."],
+ ["a02","Les Piliers","Demon Slayer","Le respect","Les plus forts guerriers s'inclinent ensemble devant leur maître. Le respect n'enlève rien à ta force.","Aujourd'hui : traite chaque client de coiffure et de vente comme un VIP. C'est ça qui fidélise."],
+ ["a14","Nezuko","Demon Slayer","La maîtrise de soi","Nezuko résiste chaque jour à ce qui pourrait la détruire. Sa force, c'est son contrôle.","Aujourd'hui : no drug, no girl, pas de scroll inutile. Chaque « non » est une victoire."],
+ ["a01","Akaza","Demon Slayer","La force sans but","Akaza s'entraîne sans fin, mais il a oublié pour qui il se battait. La force sans direction ne mène nulle part.","Aujourd'hui : avant chaque séance, dis-toi pour quoi tu la fais."],
+ ["a07","Gojo","Jujutsu Kaisen","Le calme de celui qui est prêt","Gojo reste tranquille parce qu'il a fait le travail avant. Sa confiance vient de sa préparation.","Aujourd'hui : prépare demain ce soir au bilan. Tu dormiras l'esprit libre."],
+ ["a09","Gojo","Jujutsu Kaisen","Pas de limite","Il vole au-dessus de la ville. Les seules limites qui t'arrêtent, ce sont celles que tu acceptes.","Aujourd'hui : fixe un objectif d'argent un peu plus haut que d'habitude et vise-le."],
+ ["a10","Goku","Dragon Ball","Cherche plus fort que toi","Goku est heureux quand il trouve un adversaire plus fort. Il voit le challenge comme une chance de grandir.","Aujourd'hui : regarde un joueur ou un artiste meilleur que toi, et note ce qu'il fait mieux."],
+ ["a11","Sasuke","Naruto","L'objectif clair","Sasuke avait un but net, mais il s'est isolé de ceux qui l'aimaient. L'objectif ne doit pas couper les vrais liens.","Aujourd'hui : lock-in, oui, mais passe un message à quelqu'un de ta famille."],
+ ["a12","Eren","L'Attaque des Titans","Avancer","Eren avance quoi qu'il arrive. Mais avancer sans réfléchir peut te mener là où tu ne voulais pas aller.","Aujourd'hui : avant une grosse dépense, attends 24 heures. Avance avec sagesse."],
+ ["a13","Luffy","One Piece","Annonce ton rêve","Luffy dit à tout le monde qu'il sera Roi des Pirates, sans honte. Puis il agit chaque jour pour le mériter.","Aujourd'hui : écris ton grand objectif pour dans un an. Lis-le chaque matin."],
+ ["a15","Deku","My Hero Academia","Partir de zéro","Deku n'avait aucun pouvoir au départ. Il a compensé avec des carnets, de l'analyse et un entraînement quotidien.","Aujourd'hui : note ton avancement dans chaque mission. Ton carnet, c'est cette app."],
+ ["a17","Lelouch","Code Geass","Pense dix coups à l'avance","Lelouch joue sa vie comme une partie d'échecs. Chaque pièce a un rôle, chaque coup est préparé.","Aujourd'hui : regarde ta semaine et repère le créneau qui risque de sauter. Prévois un plan B."],
+ ["a18","Light","Death Note","L'orgueil fait tomber","Light était brillant, mais l'orgueil l'a perdu. L'intelligence sans humilité finit mal.","Aujourd'hui : demande un avis honnête sur ton site ou ton son. Accepte la critique."],
+ ["a19","Gon","Hunter x Hunter","Garde la curiosité","Gon progresse vite parce qu'il s'amuse. Il voit chaque épreuve comme une aventure.","Aujourd'hui : teste un nouveau format TikTok juste pour le fun. Amusement = carburant."]
+];
+const sensei = (off=0)=>{const d=new Date(),doy=Math.floor((d-new Date(d.getFullYear(),0,0))/864e5);return ANIME[(doy+off)%ANIME.length];};
+function senseiCard(a,i){return `<article class="vb-sensei vb-anim" style="--i:${i}">
+  <div class="vb-sensei__img"><img src="img/${a[0]}.jpg" alt="${esc(a[1])}, ${esc(a[2])}" loading="lazy"></div>
+  <div class="vb-sensei__txt">
+    <div class="vb-offer__badge" style="align-self:flex-start;margin:0 0 14px">Sensei du jour · ${esc(a[2])}</div>
+    <h4 class="vb-sensei__name">${esc(a[1])}<em>${esc(a[3])}</em></h4>
+    <p class="vb-sensei__lesson">${esc(a[4])}</p>
+    <p class="vb-sensei__do">${esc(a[5])}</p>
+  </div></article>`;}
+
+/* ===================== Utilitaires ===================== */
+const $ = (s,r=document)=>r.querySelector(s);
+const pad = n=>String(n).padStart(2,"0");
+const keyOf = d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const fromKey = k=>{const [y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d);};
+const esc = s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const eur = n=>(Math.round(n*100)/100).toLocaleString("fr-FR",{maximumFractionDigits:2})+" €";
+const mins = t=>{const [h,m]=t.split(":").map(Number);return h*60+m;};
+const uid = ()=>Math.random().toString(36).slice(2,10);
+let toastT;
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("is-on");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("is-on"),1900);}
+
+/* ===================== Stockage ===================== */
+const S={days:{},settings:{missions:{}},base:null,assets:null};
+function lsGet(k,f){try{const v=localStorage.getItem(k);return v?JSON.parse(v):f;}catch(e){return f;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+S.days=lsGet("vie.days",{});S.settings=lsGet("vie.settings",{missions:{}});
+function day(k){const d=S.days[k]||(S.days[k]={});d.done||={};d.habits||={};d.notes||={};d.proofs||={};d.missions||={};d.money||=[];d.clients||=0;return d;}
+const timers={};
+function saveDay(k){
+  lsSet("vie.days",S.days);
+  if(!S.base) return;
+  clearTimeout(timers[k]);
+  timers[k]=setTimeout(async()=>{try{await S.base.days.doc(k).set(JSON.parse(JSON.stringify(S.days[k])));}catch(e){toast("Pas enregistré en ligne");}},600);
+}
+async function saveSettings(){lsSet("vie.settings",S.settings);if(S.base){try{await S.base.settings.set(S.settings);}catch(e){}}}
+const editing=()=>{const a=document.activeElement;return a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&a.type!=="checkbox";};
+async function connect(){
+  if(!window.claude?.use) return;
+  try{
+    const [db,user,assets]=await Promise.all([claude.use("db"),claude.use("user"),claude.use("assets")]);
+    S.assets=assets;
+    if(!db||!user) return;
+    const id=await user.id();
+    S.base={days:db.collection("data/users/"+id+"/vie/days"),settings:db.doc("data/users/"+id+"/settings")};
+    const sy=$("#sync");sy.classList.add("on");sy.lastChild.textContent="Synchro";
+    let first=true;
+    S.base.days.onSnapshot(snap=>{
+      const remote={};snap.docs.forEach(d=>{remote[d.id]=JSON.parse(JSON.stringify(d.data()));});
+      if(first){const local=lsGet("vie.days",{});Object.keys(local).forEach(k=>{if(!remote[k]){remote[k]=local[k];S.days[k]=local[k];saveDay(k);}});first=false;}
+      S.days=remote;lsSet("vie.days",S.days);
+      if(!editing()) renderAll(true);
+    },()=>{});
+    S.base.settings.onSnapshot(s=>{if(s.exists){S.settings=JSON.parse(JSON.stringify(s.data()));S.settings.missions||={};lsSet("vie.settings",S.settings);if(!editing()) renderAll(true);}},()=>{});
+  }catch(e){}
+}
+
+/* ===================== Logique ===================== */
+const todayKey=()=>keyOf(new Date());
+const missionOf=(k,p)=>day(k).missions[p]||S.settings.missions[p]||PROJECTS.find(x=>x.k===p).def;
+const habitsFor=k=>{const d=fromKey(k).getDay();return HABITS.filter(h=>!h.sunday||d===0);};
+function progress(k){const d=day(k),hs=habitsFor(k),t=PROJECTS.length+hs.length,n=PROJECTS.filter(p=>d.done[p.k]).length+hs.filter(h=>d.habits[h.k]).length;return{n,t,pct:Math.round(n/t*100)};}
+function streak(){let n=0;const d=new Date();const full=k=>{const x=S.days[k];return x&&x.done&&PROJECTS.every(p=>x.done[p.k]);};if(!full(keyOf(d)))d.setDate(d.getDate()-1);while(full(keyOf(d))){n++;d.setDate(d.getDate()-1);}return n;}
+function allMoney(){const o=[];Object.entries(S.days).forEach(([k,d])=>(d.money||[]).forEach(m=>o.push({...m,date:k})));return o.sort((a,b)=>b.date.localeCompare(a.date));}
+function sums(l){const g=l.filter(m=>m.kind==="gain").reduce((a,m)=>a+Number(m.amt||0),0),s=l.filter(m=>m.kind==="depense").reduce((a,m)=>a+Number(m.amt||0),0);return{g,s,save:g*.8,spend:g*.2,left:g*.2-s};}
+function lastN(n){const set=new Set(),d=new Date();for(let i=0;i<n;i++){set.add(keyOf(d));d.setDate(d.getDate()-1);}return set;}
+function nowMin(){const n=new Date();return n.getHours()*60+n.getMinutes();}
+function curSlot(plan){const m=nowMin();return plan.find(s=>m>=mins(s[0])&&m<mins(s[1]))||plan.find(s=>mins(s[0])>m)||null;}
+function tip(off=0){const d=new Date(),doy=Math.floor((d-new Date(d.getFullYear(),0,0))/864e5);return TIPS[(doy+off)%TIPS.length];}
+
+/* ===================== Panneaux ===================== */
+let selDay=new Date().getDay(),moneyKind="gain",moneyRange="5",dojoPick=null;
+const A=(i)=>`class="vb-anim" style="--i:${i}"`;
+
+function pJour(){
+  const k=todayKey(),now=new Date(),plan=PLAN(now.getDay()),cur=curSlot(plan),pr=progress(k),d=day(k),st=streak(),t=tip();
+  const m5=sums(allMoney().filter(m=>lastN(5).has(m.date)));
+  const isNow=cur&&mins(cur[0])<=nowMin();
+  return `
+  <div class="vb-kicker vb-anim" style="--i:0"><em>i.</em>Aujourd'hui</div>
+  <h2 class="vb-title vb-anim" style="--i:1">${DAYN[now.getDay()]} ${now.getDate()} ${MONTHN[now.getMonth()]}.<em>Lock-in.</em></h2>
+  <div class="ring vb-anim" style="--i:2"><div class="c" style="--p:${pr.pct}"><b>${pr.pct}%</b></div>
+    <div class="t">${cur?`${isNow?"En ce moment":"Prochain"} · ${cur[0]} – ${cur[1]}<strong>${esc(cur[3])}</strong>`:`Journée terminée<strong>Douche, lecture, au lit avant 1 h.</strong>`}
+    ${pr.n}/${pr.t} faits · série de ${st} jour${st>1?"s":""}</div></div>
+  <p class="vb-lead vb-anim" style="--i:3">Six missions, une par projet. Ouvre-en une pour noter ton avancement, ajouter une photo preuve et la valider.</p>
+  <ol class="vb-steps vb-anim" style="--i:4">${PROJECTS.map((p,i)=>mission(k,p,i)).join("")}</ol>
+
+  <h3 class="vb-h3 vb-anim" style="--i:5">Hygiène <em>de vie</em></h3>
+  <div class="vb-anim" style="--i:6">${habitsFor(k).map(h=>`<label class="vb-check ${d.habits[h.k]?"done":""}"><input class="box" type="checkbox" id="h-${h.k}" data-act="habit" data-h="${h.k}" ${d.habits[h.k]?"checked":""}><span class="t">${esc(h.n)}</span></label>`).join("")}</div>
+
+  <h3 class="vb-h3 vb-anim" style="--i:7">Conseil <em>du jour</em></h3>
+  ${senseiCard(sensei(),8)}
+  <div class="vb-soon vb-anim" style="--i:8;margin-top:24px"><small>${esc(t[0])}</small>${esc(t[1])}</div>
+
+  <h3 class="vb-h3 vb-anim" style="--i:9">Point <em>argent</em></h3>
+  <p class="vb-sub vb-anim" style="--i:9">Les 5 derniers jours</p>
+  <ul class="vb-offer__list vb-anim" style="--i:10;max-width:520px">
+    <li><span>Gagné</span><b>${eur(m5.g)}</b></li>
+    <li><span>Épargné · 80 %</span><b>${eur(m5.save)}</b></li>
+    <li><span>Tu peux dépenser · 20 %</span><b>${eur(m5.spend)}</b></li>
+    <li><span>Il te reste</span><b style="color:${m5.left<0?"var(--bad)":"var(--ok)"}">${eur(m5.left)}</b></li>
+  </ul>
+  <div class="vb-btns vb-anim" style="--i:11;margin-top:24px"><button class="vb-btn vb-btn--ghost" data-vb-go="argent">Noter de l'argent →</button></div>
+  <div class="vb-closing vb-anim" style="--i:12"><p>Une mission à la fois.<br><em>Une victoire chaque jour.</em></p></div>`;
+}
+
+function mission(k,p,i){
+  const d=day(k),ok=!!d.done[p.k],proofs=d.proofs[p.k]||[];
+  const venteSum=d.money.filter(m=>m.kind==="gain"&&m.src==="Vente").reduce((a,m)=>a+Number(m.amt||0),0);
+  return `<li class="vb-step ${ok?"ok":""}"><details data-p="${p.k}">
+    <summary class="row" style="display:flex;align-items:baseline;gap:18px;padding:18px 0;cursor:pointer;list-style:none"><span class="n">${i+1}</span><span class="w"><b>${esc(p.n)}</b><span>${esc(missionOf(k,p.k))}</span></span><span class="st ${ok?"ok":""}">${ok?"Validé":"À faire"}</span></summary>
+    <div class="body">
+      <label class="vb-label">Mission du jour<input class="vb-input" type="text" id="mis-${p.k}" data-act="mission" data-p="${p.k}" value="${esc(missionOf(k,p.k))}"></label>
+      ${p.k==="vente"?`<div class="grid2"><label class="vb-label">Clients traités<input class="vb-input" type="number" inputmode="numeric" min="0" id="cli" data-act="clients" value="${d.clients||0}"></label>
+        <div class="vb-label">Encaissé aujourd'hui<span style="font-family:var(--serif);font-size:30px;letter-spacing:0;color:var(--ok);text-transform:none">${eur(venteSum)}</span></div></div>
+        <div class="vb-field"><input type="number" inputmode="decimal" id="venteAmt" placeholder="Montant d'une vente (€)"><button type="button" data-act="addVente">Ajouter</button></div>`:""}
+      <label class="vb-label">Avancement d'aujourd'hui<textarea class="vb-input" id="note-${p.k}" data-act="note" data-p="${p.k}" placeholder="Ce que tu as fait, où tu en es…">${esc(d.notes[p.k]||"")}</textarea></label>
+      ${proofs.length?`<div class="proofs">${proofs.map(s=>`<img src="${esc(s)}" alt="Preuve ${esc(p.n)}">`).join("")}</div>`:""}
+      <div class="vb-btns">
+        <span class="vb-btn vb-btn--ghost vb-btn--sm vb-upl">Photo preuve<input type="file" accept="image/*" id="proof-${p.k}" data-act="proof" data-p="${p.k}"></span>
+        <button class="vb-btn vb-btn--sm ${ok?"vb-btn--ghost":"vb-btn--ok"}" data-act="validate" data-p="${p.k}">${ok?"Annuler":"Valider la mission"}</button>
+      </div>
+    </div></details></li>`;
+}
+
+function pSemaine(){
+  const today=new Date().getDay(),plan=PLAN(selDay),m=nowMin();
+  return `
+  <div class="vb-kicker vb-anim" style="--i:0"><em>ii.</em>Semaine</div>
+  <h2 class="vb-title vb-anim" style="--i:1">Le même planning.<em>Toutes les semaines.</em></h2>
+  <p class="vb-lead vb-anim" style="--i:2">De 8 h à 22 h 30, chaque projet a son créneau. Après 22 h 30, la soirée est à toi. Au lit avant 1 h.</p>
+  <div class="vb-days vb-anim" style="--i:3">${[1,2,3,4,5,6,0].map(i=>`<button data-day="${i}" class="${i===selDay?"on":""}" aria-pressed="${i===selDay}">${DAYN[i].slice(0,3)}${i===today?" ·":""}</button>`).join("")}</div>
+  <div class="vb-anim" style="--i:4">${plan.map(s=>`<div class="vb-slot ${selDay===today&&m>=mins(s[0])&&m<mins(s[1])?"cur":""}"><div class="h">${s[0]}<small>${s[1]}</small></div><div class="d"><small style="color:${s[2]==="vie"?"rgba(243,235,224,.5)":"var(--line)"}">${CAT[s[2]]}</small>${esc(s[3])}</div></div>`).join("")}</div>
+  <div class="vb-closing vb-anim" style="--i:5"><p>Un an de régularité.<br><em>Step by step.</em></p></div>`;
+}
+
+function pProjets(){
+  const keys=Object.keys(S.days).sort().reverse();
+  return `
+  <div class="vb-kicker vb-anim" style="--i:0"><em>iii.</em>Projets</div>
+  <h2 class="vb-title vb-anim" style="--i:1">Six projets.<em>Une seule direction.</em></h2>
+  <p class="vb-lead vb-anim" style="--i:2">La mission de tous les jours se règle ici. Pour changer seulement un jour, fais-le depuis Aujourd'hui.</p>
+  <ol class="vb-steps vb-anim" style="--i:3">${PROJECTS.map((p,i)=>{
+    const hist=keys.filter(d=>(S.days[d].notes||{})[p.k]||(S.days[d].done||{})[p.k]).slice(0,6);
+    const nd=keys.filter(d=>(S.days[d].done||{})[p.k]).length;
+    return `<li class="vb-step"><details><summary style="display:flex;align-items:baseline;gap:18px;padding:18px 0;cursor:pointer;list-style:none"><span class="n">${i+1}</span><span class="w"><b>${esc(p.n)}</b><span>${nd} jour${nd>1?"s":""} validé${nd>1?"s":""}</span></span></summary>
+      <div class="body">
+        <label class="vb-label">Mission de tous les jours<input class="vb-input" type="text" id="def-${p.k}" data-act="defmission" data-p="${p.k}" value="${esc(S.settings.missions[p.k]||p.def)}"></label>
+        ${hist.length?hist.map(d=>{const x=S.days[d],dt=fromKey(d);return `<div class="vb-hist"><b>${DAYN[dt.getDay()]} ${dt.getDate()} ${MONTHN[dt.getMonth()]} · ${(x.done||{})[p.k]?"validé":"non validé"}</b>${(x.notes||{})[p.k]?`<div>${esc(x.notes[p.k])}</div>`:""}</div>`;}).join(""):`<div class="vb-hist">Pas encore d'avancement noté. Commence aujourd'hui.</div>`}
+      </div></details></li>`;}).join("")}</ol>
+  <h3 class="vb-h3 vb-anim" style="--i:4">Projet <em>en cours</em></h3>
+  <div class="vb-offers vb-anim" style="--i:5;max-width:520px"><article class="vb-offer">
+    <div class="vb-offer__badge">En cours</div>
+    <h4 class="vb-offer__name">Permis de conduire</h4>
+    <div class="vb-offer__tag">30 min de code chaque soir.</div>
+    <label class="vb-label">Où j'en suis<textarea class="vb-input" id="permis" data-act="permis" placeholder="Code : X/40 au dernier test. Conduite : X heures…">${esc(S.settings.permis||"")}</textarea></label>
+  </article></div>`;
+}
+
+function pArgent(){
+  const all=allMoney(),tot=sums(all),r=moneyRange==="5"?lastN(5):moneyRange==="30"?lastN(30):null;
+  const list=r?all.filter(m=>r.has(m.date)):all,s=sums(list);
+  const used=s.spend>0?Math.min(100,s.s/s.spend*100):(s.s>0?100:0);
+  const advice=s.g===0?"Aucun gain noté sur cette période. Note chaque coupe et chaque vente au bilan du soir, même 5 €.":
+    s.left<0?`Tu as dépassé tes 20 % de ${eur(-s.left)}. Pas de dépense plaisir jusqu'aux prochains gains.`:
+    s.s/s.spend>.75?`Tu as utilisé ${Math.round(s.s/s.spend*100)} % de ton budget. Garde les ${eur(s.left)} restants pour l'essentiel.`:
+    `Bien géré. ${eur(s.save)} à mettre de côté, et encore ${eur(s.left)} à dépenser librement.`;
+  const srcs=["Coiffure","Vente","Chômage","Musique","Marque","Modèle","Autre"];
+  const rl={"5":"5 derniers jours","30":"30 derniers jours","all":"Depuis le début"}[moneyRange];
+  return `
+  <div class="vb-kicker vb-anim" style="--i:0"><em>iv.</em>Argent</div>
+  <h2 class="vb-title vb-anim" style="--i:1">80 % épargnés.<em>20 % pour vivre.</em></h2>
+  <p class="vb-quote vb-anim" style="--i:2">« Je suis mon propre comptable. »</p>
+  <div class="vb-seg vb-anim" style="--i:3">${[["5","5 jours"],["30","30 jours"],["all","Tout"]].map(([v,n])=>`<button data-range="${v}" class="${moneyRange===v?"on":""}">${n}</button>`).join("")}</div>
+  <div class="vb-offers vb-anim" style="--i:4">
+    <article class="vb-offer vb-offer--featured">
+      <div class="vb-offer__badge">${rl}</div>
+      <h4 class="vb-offer__name">Tu peux dépenser</h4>
+      <div class="vb-offer__big" style="color:${s.left<0?"var(--bad)":"var(--cream)"}">${eur(s.left)}</div>
+      <div class="vb-meter"><i style="width:${used}%"></i></div>
+      <div class="vb-offer__tag" style="font-size:16px">${eur(s.s)} dépensés sur ${eur(s.spend)} autorisés</div>
+      <div class="vb-offer__text">${esc(advice)}</div>
+    </article>
+    <article class="vb-offer">
+      <div class="vb-offer__badge">Répartition</div>
+      <h4 class="vb-offer__name">Ce que tu as gagné</h4>
+      <div class="vb-offer__big">${eur(s.g)}</div>
+      <ul class="vb-offer__list">
+        <li><span>Épargne · 80 %</span><b>${eur(s.save)}</b></li>
+        <li><span>À dépenser · 20 %</span><b>${eur(s.spend)}</b></li>
+        <li><span>Déjà dépensé</span><b>${eur(s.s)}</b></li>
+      </ul>
+    </article>
+  </div>
+
+  <h3 class="vb-h3 vb-anim" style="--i:5">Ajouter <em>une ligne</em></h3>
+  <div class="vb-anim" style="--i:6;max-width:560px;display:flex;flex-direction:column;gap:16px">
+    <div class="vb-seg" style="margin:0"><button data-kind="gain" class="${moneyKind==="gain"?"on":""}">Gain</button><button data-kind="depense" class="${moneyKind==="depense"?"on":""}">Dépense</button></div>
+    <div class="grid2">
+      <label class="vb-label">Montant (€)<input class="vb-input" type="number" inputmode="decimal" id="mAmt" placeholder="0"></label>
+      <label class="vb-label">Date<input class="vb-input" type="date" id="mDate" value="${todayKey()}"></label>
+    </div>
+    ${moneyKind==="gain"?`<label class="vb-label">Source<select class="vb-input" id="mSrc">${srcs.map(x=>`<option>${x}</option>`).join("")}</select></label>`:""}
+    <label class="vb-label">Détail<input class="vb-input" type="text" id="mLbl" placeholder="${moneyKind==="gain"?"Ex : dégradé + barbe":"Ex : resto, vêtement…"}"></label>
+    <div class="vb-btns"><button class="vb-btn" data-act="addMoney">Enregistrer →</button></div>
+    <div class="vb-note" style="margin-top:0">Chômage : 1 000 €/mois · ajoute-le en gain si tu veux l'inclure dans le 80/20</div>
+  </div>
+
+  <h3 class="vb-h3 vb-anim" style="--i:7">Historique</h3>
+  <div class="vb-anim" style="--i:8;max-width:720px">${list.length?list.slice(0,40).map(m=>{const dt=fromKey(m.date);return `<div class="vb-ent"><div class="l"><b>${esc(m.kind==="gain"?(m.src||"Gain"):"Dépense")}</b><small>${dt.getDate()} ${MONTHN[dt.getMonth()]}${m.label?" · "+esc(m.label):""}</small></div><span class="a ${m.kind==="gain"?"p":"m"}">${m.kind==="gain"?"+":"−"}${eur(Number(m.amt))}</span><button class="vb-x" aria-label="Supprimer" data-act="delMoney" data-date="${m.date}" data-id="${m.id}">×</button></div>`;}).join(""):`<div class="vb-soon" style="font-size:20px">Rien sur cette période. Ta première coupe ou vente notée apparaîtra ici.</div>`}</div>
+  <div class="vb-note vb-anim" style="--i:9">Depuis le début : ${eur(tot.g)} gagnés · ${eur(tot.save)} à l'épargne</div>`;
+}
+
+function pConseils(){
+  const t=[tip(),tip(7),tip(15)];
+  return `
+  <div class="vb-kicker vb-anim" style="--i:0"><em>v.</em>Conseils</div>
+  <h2 class="vb-title vb-anim" style="--i:1">Sagesse. Respect.<em>Réussite.</em></h2>
+  <div id="senseiBox">${senseiCard(dojoPick!=null?ANIME[dojoPick]:sensei(),2)}</div>
+  <h3 class="vb-h3 vb-anim" style="--i:3">Le <em>dojo</em></h3>
+  <p class="vb-sub vb-anim" style="--i:3">20 leçons · un nouveau sensei chaque jour · touche-en un pour le relire</p>
+  <div class="vb-dojo vb-anim" style="--i:4">${ANIME.map((a,i)=>`<button type="button" data-sensei="${i}" class="${(dojoPick!=null?ANIME[dojoPick]:sensei())===a?"on":""}"><img src="img/${a[0]}.jpg" alt="" loading="lazy"><b>${esc(a[1])}</b><small>${esc(a[3])}</small></button>`).join("")}</div>
+  <h3 class="vb-h3 vb-anim" style="--i:5">Conseils <em>pratiques</em></h3>
+  ${t.map((x,i)=>`<div class="vb-soon vb-anim" style="--i:${5+i}"><small>${esc(x[0])}</small>${esc(x[1])}</div>`).join("")}
+  <h3 class="vb-h3 vb-anim" style="--i:5">Mes <em>règles</em></h3>
+  <ol class="vb-steps vb-anim" style="--i:6">${["Dormir avant 1 h, 2 h grand max. Debout à 8 h, 10 h maximum.","Douche le matin et le soir. Le dimanche soir : skincare et coiffure.","Chambre propre avant de sortir.","Une séance de muscu et 15 à 30 min de lecture chaque jour.","Une mission par projet chaque jour, validée avant de dormir.","80 % épargnés, 20 % dépensés.","No drug. No girl. Lock-in pendant un an."].map((r,i)=>`<li class="vb-step"><div class="row"><span class="n">${i+1}</span><span class="w"><span style="margin-top:0">${r}</span></span></div></li>`).join("")}</ol>
+  <h3 class="vb-h3 vb-anim" style="--i:7">Bien <em>manger</em></h3>
+  <p class="vb-sub vb-anim" style="--i:7">Une protéine, un féculent, des légumes à chaque repas</p>
+  <div class="vb-offers vb-anim" style="--i:8">${RECIPES.map((r,i)=>`<article class="vb-offer${i===0?" vb-offer--featured":""}"><div class="vb-offer__badge">${ROMAN[i]} Recette</div><h4 class="vb-offer__name">${esc(r[0])}</h4><div class="vb-offer__tag">${esc(r[1])}</div><div class="vb-offer__text">${esc(r[2])}</div></article>`).join("")}</div>
+  <div class="vb-closing vb-anim" style="--i:9"><p>Sagesse, paix, respect, intelligence,<br><em>amusement, challenge, réussite.</em></p>
+    <div class="vb-words"><span class="no">No drug</span><span class="no">No girl</span><span>Lock-in</span></div></div>`;
+}
+
+const PANELS={jour:pJour,semaine:pSemaine,projets:pProjets,argent:pArgent,conseils:pConseils};
+const TABS=Object.keys(PANELS);
+let current="jour";
+function renderPanel(t,keepOpen){
+  const el=$(`[data-vb-panel="${t}"] .vb-panel__content`);
+  const open=keepOpen?[...el.querySelectorAll("details[open]")].map(d=>d.dataset.p||d.querySelector(".w b")?.textContent):[];
+  el.innerHTML=PANELS[t]();
+  open.forEach(o=>{[...el.querySelectorAll("details")].find(d=>(d.dataset.p||d.querySelector(".w b")?.textContent)===o)?.setAttribute("open","");});
+}
+function renderAll(keep){TABS.forEach(t=>renderPanel(t,keep));}
+
+/* ===================== Navigation (même mécanique que V Barber) ===================== */
+const root=$("#vb");
+function moveBar(){
+  const btn=$(`.vb-tab[data-vb-go="${current}"]`),bar=$(".vb-tabs__bar"),nav=$(".vb-tabs");
+  if(!btn) return;const a=btn.getBoundingClientRect(),b=nav.getBoundingClientRect();
+  bar.style.width=Math.max(0,a.width-24)+"px";bar.style.transform=`translateX(${a.left-b.left+12}px)`;
+}
+function go(t){
+  if(!PANELS[t]) return;
+  current=t;
+  document.querySelectorAll(".vb-tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.vbGo===t?"true":"false"));
+  document.querySelectorAll(".vb-panel").forEach(p=>{const on=p.dataset.vbPanel===t;p.classList.toggle("is-active",on);if(on)p.scrollTop=0;});
+  if(root.classList.contains("vb--site")) scene.to(TABS.indexOf(t)+1);
+  moveBar();
+}
+function enter(){root.classList.add("vb--site");try{sessionStorage.setItem("vie.entered","1");}catch(e){}go(current);}
+window.addEventListener("resize",moveBar);
+
+/* ===================== Fond : tes photos en fondu (comme le diaporama V Barber) ===================== */
+const SETS=[
+  (()=>{const v=[...Array(15)].map((_,i)=>"vf"+String(i+1).padStart(2,"0"));const d=new Date(),o=Math.floor((d-new Date(d.getFullYear(),0,0))/864e5)%15;return v.slice(o).concat(v.slice(0,o));})(),
+  ["jour1","jour2","jour3","intro1","intro4"],
+  ["sem1","sem2","con2","intro2","intro3","intro5"],
+  ["proj2","proj3","con1","con3"],
+  ["arg1","arg2","arg3","arg4"],
+  ["a08","a20","a13","a17","a05","a09","a10","a03"]
+];
+const scene=(()=>{
+  const stage=$(".vb-stage"),imgs={};
+  function img(n){ if(!imgs[n]){
+    if(n.startsWith("vf")){const w=document.createElement("div");w.className="vb-v";w.innerHTML=`<img class="bg" alt="" decoding="async" src="img/${n}.jpg"><img class="fg" alt="" decoding="async" src="img/${n}.jpg">`;stage.appendChild(w);imgs[n]=w;}
+    else{const i=document.createElement("img");i.alt="";i.decoding="async";i.src="img/"+n+".jpg";stage.appendChild(i);imgs[n]=i;}
+  } return imgs[n]; }
+  let set=0,idx=0,timer,shown=null;
+  function show(){
+    const n=SETS[set][idx%SETS[set].length],el=img(n);
+    if(shown&&shown!==el) shown.classList.remove("is-active");
+    el.classList.remove("is-active");void el.offsetWidth;el.classList.add("is-active");shown=el;
+    const nx=SETS[set][(idx+1)%SETS[set].length];img(nx);
+    if(set===0){[...document.querySelectorAll("[data-vb-dots] span")].forEach((d,j)=>{d.classList.remove("is-active");if(j===idx%SETS[0].length){void d.offsetWidth;d.classList.add("is-active");}});}
+  }
+  function start(){clearInterval(timer);show();if(SETS[set].length>1)timer=setInterval(()=>{idx++;show();},set===0?3000:7000);}
+  SETS[0].forEach(img);
+  return{to(i){if(i===set&&shown)return;set=i;idx=0;start();},start};
+})();
+(()=>{const w=$("[data-vb-dots]");SETS[0].forEach(()=>w.appendChild(document.createElement("span")));})();
+scene.start();
+
+/* Logo V du jour : un des 15 V, change chaque jour */
+(()=>{const d=new Date(),doy=Math.floor((d-new Date(d.getFullYear(),0,0))/864e5),src="img/v"+String(doy%15+1).padStart(2,"0")+".jpg";
+  $("#logoHead").src=src;})();
+
+/* ===================== Interactions ===================== */
+function reopen(p){$(`[data-vb-panel="${current}"] details[data-p="${p}"]`)?.setAttribute("open","");}
+document.addEventListener("click",e=>{
+  if(!root.classList.contains("vb--site")&&e.target.closest(".vb-intro")) return enter();
+  const t=e.target.closest("[data-vb-enter],[data-vb-go],[data-day],[data-kind],[data-range],[data-sensei],[data-act]");if(!t)return;
+  if(t.hasAttribute("data-vb-enter")) return enter();
+  if(t.dataset.vbGo){ if(!root.classList.contains("vb--site")) enter(); return go(t.dataset.vbGo); }
+  if(t.dataset.day){selDay=Number(t.dataset.day);renderPanel("semaine");return;}
+  if(t.dataset.kind){moneyKind=t.dataset.kind;renderPanel("argent");return;}
+  if(t.dataset.range){moneyRange=t.dataset.range;renderPanel("argent");return;}
+  if(t.dataset.sensei){dojoPick=Number(t.dataset.sensei);renderPanel("conseils");const p=$('[data-vb-panel="conseils"]');p.querySelectorAll(".vb-anim").forEach(e=>e.style.transitionDelay="0s");p.scrollTo({top:0,behavior:"smooth"});return;}
+  const k=todayKey(),a=t.dataset.act;
+  if(a==="validate"){e.preventDefault();const d=day(k),p=t.dataset.p;d.done[p]=!d.done[p];saveDay(k);renderAll(true);if(!d.done[p])reopen(p);toast(d.done[p]?"Mission validée":"Validation annulée");}
+  if(a==="addVente"){const v=Number($("#venteAmt").value);if(!(v>0))return toast("Entre un montant");day(k).money.push({id:uid(),kind:"gain",src:"Vente",amt:v,label:"Vente"});saveDay(k);renderAll(true);toast("+"+eur(v)+" · vente ajoutée");}
+  if(a==="addMoney"){const v=Number($("#mAmt").value),dk=$("#mDate").value||k;if(!(v>0))return toast("Entre un montant");
+    day(dk).money.push({id:uid(),kind:moneyKind,src:moneyKind==="gain"?$("#mSrc").value:"",amt:v,label:$("#mLbl").value.trim()});saveDay(dk);renderAll(true);toast(moneyKind==="gain"?`+${eur(v)} · ${eur(v*.8)} à épargner`:"Dépense notée");}
+  if(a==="delMoney"){const d=day(t.dataset.date);d.money=d.money.filter(m=>m.id!==t.dataset.id);saveDay(t.dataset.date);renderAll(true);}
+});
+document.addEventListener("change",async e=>{
+  const t=e.target,k=todayKey(),a=t.dataset.act;if(!a)return;
+  if(a==="habit"){day(k).habits[t.dataset.h]=t.checked;saveDay(k);t.closest(".vb-check").classList.toggle("done",t.checked);const p=progress(k),c=$(".ring .c");if(c){c.style.setProperty("--p",p.pct);c.querySelector("b").textContent=p.pct+"%";}}
+  if(a==="proof"&&t.files[0]){
+    toast("Envoi de la photo…");
+    try{let src;if(S.assets){src=(await S.assets.upload(await shrink(t.files[0],1200,.82))).url;}else{src=await toURL(await shrink(t.files[0],360,.7));}
+      const p=t.dataset.p;(day(k).proofs[p]||=[]).push(src);saveDay(k);renderAll(true);reopen(p);toast("Preuve ajoutée");
+    }catch(err){toast("Photo non ajoutée, réessaie");}
+  }
+});
+const typing={};
+document.addEventListener("input",e=>{
+  const t=e.target,k=todayKey(),a=t.dataset.act;if(!a)return;
+  clearTimeout(typing[t.id]);
+  typing[t.id]=setTimeout(()=>{
+    if(a==="note"){day(k).notes[t.dataset.p]=t.value;saveDay(k);}
+    if(a==="mission"){day(k).missions[t.dataset.p]=t.value;saveDay(k);const s=t.closest("details")?.querySelector(".w span");if(s)s.textContent=t.value;}
+    if(a==="clients"){day(k).clients=Number(t.value)||0;saveDay(k);}
+    if(a==="defmission"){S.settings.missions[t.dataset.p]=t.value;saveSettings();}
+    if(a==="permis"){S.settings.permis=t.value;saveSettings();}
+  },500);
+});
+function shrink(f,max,q){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>{const s=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*s);c.height=Math.round(i.height*s);c.getContext("2d").drawImage(i,0,0,c.width,c.height);c.toBlob(b=>b?res(b):rej(),"image/jpeg",q);URL.revokeObjectURL(i.src);};i.onerror=rej;i.src=URL.createObjectURL(f);});}
+function toURL(b){return new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b);});}
+
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
+renderAll();
+let entered=false;try{entered=sessionStorage.getItem("vie.entered")==="1";}catch(e){}
+if(entered) enter(); else go("jour");
+connect();
+/* Rappel dans l'app : 15 minutes avant chaque créneau */
+const seen=new Set();let alertKey=null;
+function checkAlert(){
+  const n=new Date(),m=n.getHours()*60+n.getMinutes(),k=todayKey();
+  const nx=PLAN(n.getDay()).find(s=>{const d=mins(s[0])-m;return d>0&&d<=15;});
+  if(!nx) return;
+  const key=k+nx[0];if(seen.has(key)||alertKey===key) return;
+  alertKey=key;const d=mins(nx[0])-m;
+  $("#alertWhen").textContent=`Dans ${d} min · ${nx[0]} · ${CAT[nx[2]]}`;$("#alertWhat").textContent=nx[3];
+  $("#alert").classList.add("is-on");
+  try{navigator.vibrate&&navigator.vibrate([120,60,120]);}catch(e){}
+}
+$("#alertOk").addEventListener("click",()=>{if(alertKey)seen.add(alertKey);alertKey=null;$("#alert").classList.remove("is-on");});
+checkAlert();setInterval(checkAlert,30000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){checkAlert();if(!editing())renderPanel("jour");}});
+setInterval(()=>{if(!editing()&&!document.querySelector(".vb-panel.is-active details[open]")){renderPanel("jour");}},60000);
+</script>
+
+</body>
+</html>
